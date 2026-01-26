@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videoclases DASH - Plataforma Educativa</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- dash.js desde CDN -->
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <style>
+        /* Estilos específicos para videoclases */
+        
+         :root {
+            --video-bg: #1a1a1a;
+            --control-bg: #2d2d2d;
+            --accent-color: #4fc3a1;
+            --text-light: #ffffff;
+            --text-muted: #b3b3b3;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* HEADER */
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+        
+        .logo-text h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent-color);
+        }
+        
+        .nav-btn.home {
+            background: var(--accent-color);
+        }
+        /* VIDEO PLAYER SECTION */
+        
+        .video-section {
+            background: var(--video-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .video-header {
+            padding: 20px 30px;
+            background: var(--control-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .video-title {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .video-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        /* CONTROLS */
+        
+        .controls {
+            background: var(--control-bg);
+            padding: 20px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-btn.primary {
+            background: var(--accent-color);
+            color: #000;
+        }
+        
+        .control-btn.primary:hover {
+            background: #3db08f;
+        }
+        
+        select.control-select {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        select.control-select option {
+            background: var(--control-bg);
+            color: white;
+        }
+        /* VIDEO INFO PANEL */
+        
+        .video-info-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .video-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-label {
+            color: #b3b3b3;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #4fc3a1;
+            font-weight: bold;
+        }
+        /* INFO PANEL */
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .info-panel h3 {
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            font-size: 1.3rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .info-item h4 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .info-item p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        /* DASH STATUS */
+        
+        .dash-status {
+            background: rgba(79, 195, 161, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-icon {
+            font-size: 1.5rem;
+        }
+        
+        .status-text h4 {
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        
+        .status-text p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        /* RESPONSIVE */
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            .button-group {
+                justify-content: center;
+            }
+            .video-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .video-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🎬</div>
+                <div class="logo-text">
+                    <h1>Videoclases DASH</h1>
+                    <p>Calidad Adaptativa en Tiempo Real</p>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="index.html" class="nav-btn home">🏠 Inicio</a>
+                <a href="videollamada.html" class="nav-btn">📞 Videollamada</a>
+            </div>
+        </header>
+
+        <!-- VIDEO PLAYER -->
+        <section class="video-section">
+            <div class="video-header">
+                <h2 class="video-title">Introducción a la Programación Web</h2>
+                <p class="video-subtitle">Clase 1: HTML, CSS y JavaScript básico</p>
+            </div>
+
+            <div class="video-wrapper">
+                <video id="videoPlayer" controls crossorigin="anonymous">
+                    Tu navegador no soporta la reproducción de video HTML5.
+                </video>
+            </div>
+
+            <div class="controls">
+                <!-- PLAYBACK CONTROLS -->
+                <div class="control-group">
+                    <div class="control-label">Control de Reproducción</div>
+                    <div class="button-group">
+                        <button class="control-btn primary" onclick="playVideo()">
+                            <span>▶️</span> Reproducir
+                        </button>
+                        <button class="control-btn" onclick="pauseVideo()">
+                            <span>⏸️</span> Pausar
+                        </button>
+                        <button class="control-btn" onclick="toggleFullscreen()">
+                            <span>📺</span> Pantalla Completa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VIDEO SELECTION -->
+                <div class="control-group">
+                    <div class="control-label">Seleccionar Video</div>
+                    <select id="videoSelect" class="control-select" onchange="changeVideo()">
+                        <option value="https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd">
+                            🎓 Video 1: Introducción a Programación
+                        </option>
+                        <option value="https://dash.akamaized.net/dash264/TestCases/1a/sony/SNE_DASH_SD_CASE1A_REVISED.mpd">
+                            🎬 Video 2: Demostración DASH (Sony)
+                        </option>
+                        <option value="https://dash.akamaized.net/dash264/TestCases/2c/qualcomm/1/MultiResMPEG2.mpd">
+                            📊 Video 3: Prueba de Calidades Múltiples
+                        </option>
+                        <option value="https://dash.akamaized.net/dash264/TestCases/10c/1/manifest_ull.mpd">
+                            ⚡ Video 4: Streaming de Baja Latencia
+                        </option>
+                    </select>
+                </div>
+
+                <!-- QUALITY CONTROLS -->
+                <div class="control-group">
+                    <div class="control-label">Calidad del Video</div>
+                    <select id="qualitySelect" class="control-select" onchange="changeQuality()">
+                        <option value="auto">🔄 Automática (Recomendado)</option>
+                    </select>
+                </div>
+
+                <!-- VIDEO NAVIGATION -->
+                <div class="control-group">
+                    <div class="control-label">Navegación</div>
+                    <div class="button-group">
+                        <button class="control-btn" onclick="previousVideo()">
+                            <span>⏮️</span> Anterior
+                        </button>
+                        <button class="control-btn" onclick="nextVideo()">
+                            <span>⏭️</span> Siguiente
+                        </button>
+                        <button class="control-btn" onclick="reloadVideo()">
+                            <span>🔄</span> Recargar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- INFO BUTTONS -->
+                <div class="control-group">
+                    <div class="control-label">Información Técnica</div>
+                    <div class="button-group">
+                        <button class="control-btn" onclick="showQualityInfo()">
+                            <span>📊</span> Info Calidad
+                        </button>
+                        <button class="control-btn" onclick="showDebugInfo()">
+                            <span>🐛</span> Debug Info
+                        </button>
+                        <button class="control-btn" onclick="showStats()">
+                            <span>📈</span> Estadísticas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIDEO INFO PANEL -->
+        <div class="video-info-panel">
+            <h3>📊 Información del Video Actual</h3>
+            <div class="video-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Video</div>
+                    <div class="stat-value" id="currentVideoName">Cargando...</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Calidad Actual</div>
+                    <div class="stat-value" id="currentQualityInfo">Automática</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Calidades Disponibles</div>
+                    <div class="stat-value" id="availableQualities">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Estado</div>
+                    <div class="stat-value" id="playerStatus">Listo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO PANEL -->
+        <div class="info-panel">
+            <h3>📋 Información sobre Tecnología DASH</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h4>¿Qué es DASH?</h4>
+                    <p>MPEG-DASH es un estándar para streaming de video adaptativo que ajusta automáticamente la calidad según la velocidad de tu conexión.</p>
+                </div>
+                <div class="info-item">
+                    <h4>Beneficios</h4>
+                    <p>• Sin buffering<br>• Calidad óptima<br>• Compatible con múltiples dispositivos<br>• Eficiente en ancho de banda</p>
+                </div>
+                <div class="info-item">
+                    <h4>Tecnologías Usadas</h4>
+                    <p>• dash.js (Reproductor)<br>• MP4Box (Fragmentación)<br>• HTML5 Video<br>• JavaScript ES6+</p>
+                </div>
+            </div>
+
+            <!-- DASH STATUS -->
+            <div class="dash-status">
+                <div class="status-icon">✅</div>
+                <div class="status-text">
+                    <h4>DASH Funcionando Correctamente</h4>
+                    <p>El sistema está usando streaming adaptativo. La calidad se ajusta automáticamente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="js/dash-player.js"></script>
+</body>
+
+</html>
