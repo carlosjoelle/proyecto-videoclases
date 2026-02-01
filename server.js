@@ -79,6 +79,7 @@ const server = http.createServer((request, response) => {
         '.gif': 'image/gif',
         '.svg': 'image/svg+xml',
         '.mp4': 'video/mp4',
+        '.m4s': 'video/iso.segment',
         '.mpd': 'application/dash+xml',
         '.m3u8': 'application/vnd.apple.mpegurl',
         '.ts': 'video/MP2T'
@@ -159,4 +160,5 @@ server.listen(PORT, '0.0.0.0', () => {
 process.on('SIGINT', () => {
     console.log('\n🔴 Servidor detenido por el usuario');
     process.exit(0);
+
 });
