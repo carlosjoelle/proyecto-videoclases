@@ -6,7 +6,7 @@ console.log('📞 webrtc-jitsi.js cargado - Versión Windows');
 
 // Configuración
 const CONFIG = {
-    JITSI_DOMAIN: 'meet.jit.si',
+    JITSI_DOMAIN: '8x8.vc',
     DEFAULT_ROOM_NAME: 'proyecto-final-' + Math.random().toString(36).substr(2, 9),
     ROOM_OPTIONS: {
         width: '100%',
@@ -572,5 +572,6 @@ window.shareRoomLink = shareRoomLink;
 window.toggleCamera = toggleCamera;
 window.toggleMicrophone = toggleMicrophone;
 window.showCallStats = showCallStats;
+
 
 console.log('✅ webrtc-jitsi.js completamente cargado');
