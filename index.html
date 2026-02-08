@@ -146,6 +146,15 @@
             background: var(--secondary-color);
             transform: scale(1.05);
         }
+        /* NUEVO: TARJETA PARA PEERJS */
+        
+        .feature-card.alternative {
+            border-color: #10b981;
+        }
+        
+        .feature-card.alternative .feature-icon {
+            color: #10b981;
+        }
         /* INSTRUCTIONS */
         
         .instructions {
@@ -224,6 +233,23 @@
             color: var(--primary-color);
             border: 1px solid #e2e8f0;
         }
+        /* NUEVO: ESTILO PARA ENLACE DE GITHUB */
+        
+        .github-link {
+            display: inline-block;
+            margin-top: 15px;
+            background: #24292e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        
+        .github-link:hover {
+            background: #444d56;
+        }
         /* RESPONSIVE */
         
         @media (max-width: 768px) {
@@ -256,6 +282,9 @@
                 Proyecto Final - Implementación de sistema web para videoclases adaptativas (DASH) y videollamadas en tiempo real (WebRTC) usando tecnologías modernas.
             </p>
             <div class="windows-badge">✅ Optimizado para Windows + VS Code</div>
+            <a href="https://carlosjoelle.github.io/proyecto-videoclases/" class="github-link" target="_blank">
+                🌐 Ver en GitHub Pages
+            </a>
         </header>
 
         <!-- MAIN CONTENT - FEATURES -->
@@ -284,6 +313,18 @@
                         Iniciar Videollamada →
                     </a>
                 </div>
+
+                <!-- NUEVA TARJETA: VIDEOLAMADA PEERJS (FUNCIONAL) -->
+                <div class="feature-card alternative">
+                    <div class="feature-icon">⚡</div>
+                    <h2 class="feature-title">Videollamada PeerJS</h2>
+                    <p class="feature-description">
+                        <strong>¡GARANTIZADO FUNCIONAL!</strong> Conexión directa 1 a 1 usando PeerJS. La alternativa confiable si Jitsi no funciona.
+                    </p>
+                    <a href="videollamada-peerjs.html" class="feature-btn" style="background: #10b981;">
+                        Probar PeerJS →
+                    </a>
+                </div>
             </div>
 
             <!-- INSTRUCTIONS -->
@@ -293,29 +334,29 @@
                     <div class="step">
                         <div class="step-number">1</div>
                         <div class="step-content">
-                            <h3>Iniciar Servidor</h3>
-                            <p>Abre la terminal en VS Code y ejecuta: <code>node server.js</code></p>
+                            <h3>Acceso Rápido</h3>
+                            <p>Visita directamente: <a href="https://carlosjoelle.github.io/proyecto-videoclases/" target="_blank">GitHub Pages</a></p>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h3>Acceder a la Plataforma</h3>
-                            <p>Abre tu navegador y visita: <code>http://localhost:3000</code></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
                         <div class="step-content">
                             <h3>Probar Funcionalidades</h3>
                             <p>Selecciona Videoclases o Videollamada para probar cada módulo</p>
                         </div>
                     </div>
                     <div class="step">
-                        <div class="step-number">4</div>
+                        <div class="step-number">3</div>
                         <div class="step-content">
                             <h3>Permitir Acceso</h3>
                             <p>Habilita cámara y micrófono cuando el navegador lo solicite</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Para Desarrollo Local</h3>
+                            <p>Si clonas el repositorio, ejecuta: <code>node server.js</code> y visita <code>http://localhost:3000</code></p>
                         </div>
                     </div>
                 </div>
@@ -331,14 +372,13 @@
                 <span class="tech-item">DASH.js</span>
                 <span class="tech-item">WebRTC</span>
                 <span class="tech-item">HTML5/CSS3/JS</span>
+                <span class="tech-item">GitHub Pages</span>
             </div>
             <p>Proyecto Final - Plataforma Web para Videoclases con Transmisión Adaptativa y Videollamada</p>
-            <p><small>© 2024 - Desarrollado con Visual Studio Code en Windows</small></p>
+            <p><small>© 2024 - Desarrollado con Visual Studio Code en Windows | Hosteado en GitHub Pages</small></p>
+            <p><small>🔗 Repositorio: <a href="https://github.com/carlosjoelle/proyecto-videoclases" target="_blank">github.com/carlosjoelle/proyecto-videoclases</a></small></p>
         </footer>
     </div>
 </body>
-<!-- En index.html o página separada -->
-
 
 </html>
-
