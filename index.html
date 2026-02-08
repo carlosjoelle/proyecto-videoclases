@@ -35,8 +35,38 @@
             margin: 0 auto;
             padding: 20px;
         }
-        /* HEADER */
         
+        /* NUEVO: CONTENEDOR DE LOGOS SUPERIORES */
+        .top-logos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-left, .logo-center, .logo-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .logo-center {
+            flex: 2;
+        }
+        
+        .top-logos img {
+            max-height: 80px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        /* HEADER */
         header {
             text-align: center;
             padding: 40px 20px;
@@ -77,8 +107,8 @@
             font-weight: bold;
             margin-top: 10px;
         }
-        /* MAIN CONTENT */
         
+        /* MAIN CONTENT */
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -146,8 +176,8 @@
             background: var(--secondary-color);
             transform: scale(1.05);
         }
-        /* NUEVO: TARJETA PARA PEERJS */
         
+        /* NUEVO: TARJETA PARA PEERJS */
         .feature-card.alternative {
             border-color: #10b981;
         }
@@ -155,8 +185,8 @@
         .feature-card.alternative .feature-icon {
             color: #10b981;
         }
-        /* INSTRUCTIONS */
         
+        /* INSTRUCTIONS */
         .instructions {
             background: white;
             border-radius: 15px;
@@ -207,8 +237,8 @@
             color: #666;
             line-height: 1.6;
         }
-        /* FOOTER */
         
+        /* FOOTER */
         footer {
             text-align: center;
             padding: 30px;
@@ -233,8 +263,8 @@
             color: var(--primary-color);
             border: 1px solid #e2e8f0;
         }
-        /* NUEVO: ESTILO PARA ENLACE DE GITHUB */
         
+        /* NUEVO: ESTILO PARA ENLACE DE GITHUB */
         .github-link {
             display: inline-block;
             margin-top: 15px;
@@ -250,21 +280,38 @@
         .github-link:hover {
             background: #444d56;
         }
-        /* RESPONSIVE */
         
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
             }
+            
+            .top-logos {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .logo-left, .logo-center, .logo-right {
+                width: 100%;
+            }
+            
+            .top-logos img {
+                max-height: 60px;
+            }
+            
             h1 {
                 font-size: 2.2rem;
             }
+            
             .features {
                 grid-template-columns: 1fr;
             }
+            
             .feature-card {
                 padding: 25px;
             }
+            
             .instructions {
                 padding: 25px;
             }
@@ -274,6 +321,19 @@
 
 <body>
     <div class="container">
+        <!-- NUEVO: LOGOS SUPERIORES -->
+        <div class="top-logos">
+            <div class="logo-left">
+                <img src="industrial.png" alt="Industrial" title="Industrial">
+            </div>
+            <div class="logo-center">
+                <img src="UG.png" alt="Universidad de Guayaquil" title="Universidad de Guayaquil">
+            </div>
+            <div class="logo-right">
+                <img src="telematic.png" alt="Telemática" title="Telemática">
+            </div>
+        </div>
+
         <!-- HEADER -->
         <header>
             <div class="logo">🎓</div>
@@ -364,6 +424,3 @@
 </body>
 
 </html>
-
-
-
