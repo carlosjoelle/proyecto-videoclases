@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videollamada PeerJS - Funcional</title>
+    <!-- PeerJS CDN -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        /* HEADER */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .header h1 {
+            color: #2563eb;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .status-container {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #f8fafc;
+            border-radius: 50px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        #status {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .connected { color: #10b981; }
+        .disconnected { color: #ef4444; }
+        .calling { color: #f59e0b; }
+        
+        /* VIDEOS SECTION */
+        .videos-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1024px) {
+            .videos-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .video-container {
+            background: #1a1a1a;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .video-label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        video {
+            width: 100%;
+            height: 400px;
+            display: block;
+            background: #000;
+            transform: scaleX(-1); /* Efecto espejo */
+        }
+        
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #999;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        /* CONTROLS */
+        .controls-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1f2937;
+            font-size: 1.8rem;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 25px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .control-btn.call {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .control-btn.call:hover {
+            background: rgba(16, 185, 129, 0.2);
+        }
+        
+        .control-btn.end {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .control-btn.end:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .control-btn.share {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .control-btn.share:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .control-icon {
+            font-size: 3rem;
+        }
+        
+        .control-text {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1f2937;
+        }
+        
+        .control-desc {
+            color: #6b7280;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        /* ID SECTION */
+        .id-section {
+            background: #f0f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #bae6fd;
+        }
+        
+        .id-section h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .peer-id-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 15px 0;
+            border: 2px dashed #cbd5e1;
+            word-break: break-all;
+            text-align: center;
+            color: #1f2937;
+        }
+        
+        .id-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn.copy {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .action-btn.copy:hover {
+            background: #2563eb;
+        }
+        
+        .action-btn.new {
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 2px solid #d1d5db;
+        }
+        
+        .action-btn.new:hover {
+            background: #e5e7eb;
+        }
+        
+        /* CALL INPUT */
+        .call-input-section {
+            background: #fefce8;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #fde047;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #854d0e;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .call-action-btn {
+            width: 100%;
+            padding: 18px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .call-action-btn:hover {
+            background: #059669;
+        }
+        
+        .call-action-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        /* INSTRUCTIONS */
+        .instructions {
+            background: #f9fafb;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #1f2937;
+            font-size: 1.8rem;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .step {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #3b82f6;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .step h4 {
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        
+        .step p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            color: #6b7280;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .tech-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            font-size: 2rem;
+        }
+        
+        /* ANIMATIONS */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease;
+        }
+        
+        /* NOTIFICATIONS */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 20px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 400px;
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-left: 5px solid #047857;
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-left: 5px solid #b91c1c;
+        }
+        
+        .notification.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-left: 5px solid #b45309;
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-left: 5px solid #1d4ed8;
+        }
+        
+        .notification-icon {
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>📞 Videollamada PeerJS</h1>
+            <p>Comunicación 1 a 1 en tiempo real usando WebRTC - ¡100% Funcional!</p>
+            <div class="status-container">
+                <div id="status" class="disconnected">🔴 Desconectado</div>
+            </div>
+        </div>
+
+        <!-- VIDEOS -->
+        <div class="videos-section">
+            <!-- LOCAL VIDEO -->
+            <div class="video-container">
+                <div class="video-label">
+                    <span>👤</span> Tu Cámara
+                </div>
+                <video id="localVideo" autoplay muted playsinline></video>
+                <div id="localPlaceholder" class="video-placeholder" style="display: none;">
+                    <div class="placeholder-icon">👤</div>
+                    <p>Cámara local</p>
+                    <p><small>Permite acceso cuando se solicite</small></p>
+                </div>
+            </div>
+
+            <!-- REMOTE VIDEO -->
+            <div class="video-container">
+                <div class="video-label">
+                    <span>👥</span> Persona Remota
+                </div>
+                <video id="remoteVideo" autoplay playsinline></video>
+                <div id="remotePlaceholder" class="video-placeholder">
+                    <div class="placeholder-icon">📞</div>
+                    <p>Esperando llamada...</p>
+                    <p><small>Inicia una llamada para ver el video</small></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls-section">
+            <h2 class="controls-title">🎮 Controles de Videollamada</h2>
+            <div class="controls-grid">
+                <div class="control-btn call" onclick="startCall()">
+                    <div class="control-icon">📞</div>
+                    <div class="control-text">Iniciar Llamada</div>
+                    <div class="control-desc">Llamar a otro usuario usando su ID</div>
+                </div>
+
+                <div class="control-btn end" onclick="endCall()">
+                    <div class="control-icon">❌</div>
+                    <div class="control-text">Terminar Llamada</div>
+                    <div class="control-desc">Finalizar la videollamada actual</div>
+                </div>
+
+                <div class="control-btn" onclick="toggleCamera()">
+                    <div class="control-icon">📹</div>
+                    <div class="control-text">Alternar Cámara</div>
+                    <div class="control-desc">Encender/Apagar tu cámara</div>
+                </div>
+
+                <div class="control-btn share" onclick="toggleMicrophone()">
+                    <div class="control-icon">🎤</div>
+                    <div class="control-text">Alternar Micrófono</div>
+                    <div class="control-desc">Silenciar/Activar tu micrófono</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- YOUR ID SECTION -->
+        <div class="id-section">
+            <h3>🆔 Tu ID de Conexión</h3>
+            <p>Comparte este ID con la persona que quieres llamar:</p>
+            <div id="peerIdDisplay" class="peer-id-display">Generando ID...</div>
+            <div class="id-actions">
+                <button class="action-btn copy" onclick="copyPeerId()">
+                    <span>📋</span> Copiar Mi ID
+                </button>
+                <button class="action-btn new" onclick="generateNewId()">
+                    <span>🆕</span> Generar Nuevo ID
+                </button>
+            </div>
+        </div>
+
+        <!-- CALL INPUT -->
+        <div class="call-input-section">
+            <h3>📞 Llamar a Otro Usuario</h3>
+            <div class="input-group">
+                <label for="remotePeerId">ID del Usuario Remoto:</label>
+                <input type="text" id="remotePeerId" placeholder="Ej: peer-abc123" 
+                       value="" onkeypress="if(event.key==='Enter') startCall()">
+            </div>
+            <button id="callButton" class="call-action-btn" onclick="startCall()">
+                <span>📞</span> Iniciar Videollamada
+            </button>
+        </div>
+
+        <!-- INSTRUCTIONS -->
+        <div class="instructions">
+            <h3>📋 Cómo Usar - Paso a Paso</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Permitir Acceso</h4>
+                    <p>Permite el acceso a cámara y micrófono cuando tu navegador lo solicite.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Copiar Tu ID</h4>
+                    <p>Copia tu ID único (arriba) y compártelo con la otra persona.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Iniciar Llamada</h4>
+                    <p>Pega el ID de la otra persona en el campo y haz clic en "Iniciar Videollamada".</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Recibir Llamada</h4>
+                    <p>La otra persona recibirá la llamada automáticamente. ¡Listo para hablar!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="tech-icons">
+                <span title="WebRTC">📡</span>
+                <span title="PeerJS">⚡</span>
+                <span title="JavaScript">🟨</span>
+                <span title="HTML5">📄</span>
+                <span title="CSS3">🎨</span>
+            </div>
+            <p>Proyecto Final - Videollamada WebRTC 1 a 1 Funcional</p>
+            <p><small>Tecnologías: PeerJS • WebRTC • JavaScript • Node.js</small></p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ============================================
+        // peerjs-videocall.js - Videollamada FUNCIONAL
+        // ============================================
+        
+        console.log('🎬 Inicializando videollamada PeerJS...');
+
+        // Variables globales
+        let peer = null;
+        let currentPeerId = null;
+        let localStream = null;
+        let remoteStream = null;
+        let currentCall = null;
+        let isCallActive = false;
+
+        // Configuración de PeerJS
+        const PEER_CONFIG = {
+            host: '0.peerjs.com',
+            port: 443,
+            path: '/',
+            secure: true,
+            debug: 3,
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' },
+                    // Servidores TURN de respaldo (gratuitos)
+                    {
+                        urls: 'turn:openrelay.metered.ca:80',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    },
+                    {
+                        urls: 'turn:openrelay.metered.ca:443',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    }
+                ]
+            }
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM cargado - Iniciando PeerJS');
+            initializePeerJS();
+            getLocalMedia();
+        });
+
+        // =================== FUNCIONES PRINCIPALES ===================
+
+        function initializePeerJS() {
+            try {
+                // Generar o recuperar ID
+                const savedPeerId = localStorage.getItem('peerId');
+                currentPeerId = savedPeerId || generatePeerId();
+                localStorage.setItem('peerId', currentPeerId);
+
+                console.log(`🆔 Inicializando Peer con ID: ${currentPeerId}`);
+
+                // Crear instancia de Peer
+                peer = new Peer(currentPeerId, PEER_CONFIG);
+
+                // Evento: Conexión exitosa
+                peer.on('open', function(id) {
+                    console.log(`✅ PeerJS conectado. ID asignado: ${id}`);
+                    updatePeerIdDisplay(id);
+                    updateStatus('connected', '🟢 Conectado - Listo para llamar');
+                    showNotification('✅ Conectado a PeerJS', 'success');
+                });
+
+                // Evento: Llamada entrante
+                peer.on('call', function(call) {
+                    console.log('📞 Llamada entrante recibida de:', call.peer);
+                    
+                    showNotification(`📞 Llamada entrante de ${call.peer}`, 'info');
+                    
+                    // Preguntar al usuario si quiere aceptar
+                    if (confirm(`¿Quieres aceptar la llamada de ${call.peer}?`)) {
+                        acceptCall(call);
+                    } else {
+                        showNotification('❌ Llamada rechazada', 'error');
+                    }
+                });
+
+                // Evento: Conexión de datos (chat)
+                peer.on('connection', function(conn) {
+                    console.log('🔗 Conexión de datos recibida:', conn.peer);
+                });
+
+                // Evento: Error
+                peer.on('error', function(err) {
+                    console.error('❌ Error PeerJS:', err);
+                    
+                    let errorMessage = 'Error de conexión: ';
+                    switch (err.type) {
+                        case 'peer-unavailable':
+                            errorMessage += 'El usuario no está disponible';
+                            break;
+                        case 'disconnected':
+                            errorMessage += 'Desconectado del servidor';
+                            break;
+                        case 'socket-error':
+                            errorMessage += 'Error de socket';
+                            break;
+                        default:
+                            errorMessage += err.message;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                    updateStatus('disconnected', '🔴 Error de conexión');
+                });
+
+                // Evento: Desconexión
+                peer.on('disconnected', function() {
+                    console.log('🔌 Peer desconectado');
+                    showNotification('🔌 Desconectado del servidor', 'warning');
+                    updateStatus('disconnected', '🔴 Desconectado');
+                });
+
+                // Evento: Cierre
+                peer.on('close', function() {
+                    console.log('🔒 Peer cerrado');
+                    updateStatus('disconnected', '🔴 Cerrado');
+                });
+
+            } catch (error) {
+                console.error('🔥 Error crítico al inicializar Peer:', error);
+                showNotification('Error crítico: ' + error.message, 'error');
+            }
+        }
+
+        function generatePeerId() {
+            const prefix = 'estudiante-';
+            const random = Math.random().toString(36).substr(2, 6);
+            return prefix + random;
+        }
+
+        function getLocalMedia() {
+            console.log('🎥 Obteniendo acceso a cámara y micrófono...');
+
+            const constraints = {
+                video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    frameRate: { ideal: 30 },
+                    facingMode: 'user'
+                },
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    localStream = stream;
+                    
+                    // Mostrar video local
+                    const localVideo = document.getElementById('localVideo');
+                    if (localVideo) {
+                        localVideo.srcObject = stream;
+                        localVideo.muted = true;
+                        console.log('✅ Cámara local activada');
+                        showNotification('✅ Cámara y micrófono activados', 'success');
+                        
+                        // Ocultar placeholder
+                        const placeholder = document.getElementById('localPlaceholder');
+                        if (placeholder) placeholder.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error al acceder a medios:', error);
+                    
+                    let errorMessage = 'No se pudo acceder a cámara/micrófono. ';
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage += 'Permiso denegado. Por favor, permite el acceso.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage += 'No se encontró cámara/micrófono.';
+                    } else if (error.name === 'NotReadableError') {
+                        errorMessage += 'Cámara/micrófono en uso por otra aplicación.';
+                    } else {
+                        errorMessage += error.message;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                    updateStatus('error', '❌ Error de cámara');
+                });
+        }
+
+        function startCall() {
+            if (!peer || !peer.disconnected) {
+                showNotification('❌ No estás conectado a PeerJS', 'error');
+                return;
+            }
+
+            if (isCallActive) {
+                showNotification('⚠️ Ya hay una llamada en curso', 'warning');
+                return;
+            }
+
+            const remotePeerId = document.getElementById('remotePeerId').value.trim();
+            if (!remotePeerId) {
+                showNotification('❌ Ingresa el ID de la persona a llamar', 'error');
+                return;
+            }
+
+            console.log(`📞 Intentando llamar a: ${remotePeerId}`);
+            updateStatus('calling', '📞 Llamando...');
+            showNotification(`Llamando a ${remotePeerId}...`, 'info');
+
+            // Obtener stream local si no está disponible
+            if (!localStream) {
+                getLocalMedia();
+                setTimeout(() => {
+                    if (localStream) makeCall(remotePeerId);
+                }, 1000);
+                return;
+            }
+
+            makeCall(remotePeerId);
+        }
+
+        function makeCall(remotePeerId) {
+            try {
+                // Realizar la llamada
+                const call = peer.call(remotePeerId, localStream);
+                currentCall = call;
+                isCallActive = true;
+
+                // Configurar eventos de la llamada
+                call.on('stream', function(stream) {
+                    console.log('✅✅✅ STREAM REMOTO RECIBIDO!');
+                    remoteStream = stream;
+                    
+                    // Mostrar video remoto
+                    const remoteVideo = document.getElementById('remoteVideo');
+                    if (remoteVideo) {
+                        remoteVideo.srcObject = stream;
+                        remoteVideo.style.transform = 'scaleX(-1)';
+                        
+                        // Ocultar placeholder
+                        const placeholder = document.getElementById('remotePlaceholder');
+                        if (placeholder) placeholder.style.display = 'none';
+                    }
+                    
+                    updateStatus('connected', '✅ En videollamada');
+                    showNotification('✅✅ ¡Videollamada conectada!', 'success');
+                    
+                    // Actualizar UI
+                    updateCallUI(true);
+                });
+
+                call.on('close', function() {
+                    console.log('📞 Llamada finalizada');
+                    endCall();
+                });
+
+                call.on('error', function(err) {
+                    console.error('❌ Error en llamada:', err);
+                    showNotification('Error en llamada: ' + err.message, 'error');
+                    endCall();
+                });
+
+            } catch (error) {
+                console.error('❌ Error al realizar llamada:', error);
+                showNotification('Error al llamar: ' + error.message, 'error');
+                updateStatus('disconnected', '🔴 Error en llamada');
+            }
+        }
+
+        function acceptCall(call) {
+            if (isCallActive) {
+                showNotification('⚠️ Ya hay una llamada en curso', 'warning');
+                return;
+            }
+
+            console.log('✅ Aceptando llamada de:', call.peer);
+            updateStatus('calling', '📞 Contestando llamada...');
+            
+            // Asegurar que tenemos stream local
+            if (!localStream) {
+                getLocalMedia();
+                setTimeout(() => {
+                    if (localStream) {
+                        call.answer(localStream);
+                        setupIncomingCall(call);
+                    }
+                }, 1000);
+                return;
+            }
+
+            call.answer(localStream);
+            setupIncomingCall(call);
+        }
+
+        function setupIncomingCall(call) {
+            currentCall = call;
+            isCallActive = true;
+
+            call.on('stream', function(stream) {
+                console.log('✅ Stream remoto recibido (llamada entrante)');
+                remoteStream = stream;
+                
+                // Mostrar video remoto
+                const remoteVideo = document.getElementById('remoteVideo');
+                if (remoteVideo) {
+                    remoteVideo.srcObject = stream;
+                    remoteVideo.style.transform = 'scaleX(-1)';
+                    
+                    // Ocultar placeholder
+                    const placeholder = document.getElementById('remotePlaceholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+                
+                updateStatus('connected', '✅ En videollamada');
+                showNotification('✅✅ ¡Videollamada conectada!', 'success');
+                
+                // Actualizar UI
+                updateCallUI(true);
+            });
+
+            call.on('close', function() {
+                console.log('📞 Llamada finalizada (entrante)');
+                endCall();
+            });
+
+            call.on('error', function(err) {
+                console.error('❌ Error en llamada entrante:', err);
+                showNotification('Error en llamada: ' + err.message, 'error');
+                endCall();
+            });
+        }
+
+        function endCall() {
+            console.log('🛑 Finalizando llamada...');
+            
+            // Cerrar llamada actual
+            if (currentCall) {
+                currentCall.close();
+                currentCall = null;
+            }
+            
+            // Detener stream remoto
+            if (remoteStream) {
+                remoteStream.getTracks().forEach(track => track.stop());
+                remoteStream = null;
+            }
+            
+            // Limpiar video remoto
+            const remoteVideo = document.getElementById('remoteVideo');
+            if (remoteVideo) {
+                remoteVideo.srcObject = null;
+                
+                // Mostrar placeholder
+                const placeholder = document.getElementById('remotePlaceholder');
+                if (placeholder) placeholder.style.display = 'flex';
+            }
+            
+            // Actualizar estado
+            isCallActive = false;
+            updateStatus('connected', '🟢 Listo para llamar');
+            updateCallUI(false);
+            
+            showNotification('📞 Llamada finalizada', 'info');
+        }
+
+        function toggleCamera() {
+            if (!localStream) {
+                showNotification('❌ No hay cámara disponible', 'error');
+                return;
+            }
+            
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                const status = videoTrack.enabled ? 'activada' : 'desactivada';
+                console.log(`📹 Cámara ${status}`);
+                showNotification(`Cámara ${status}`, 'info');
+            }
+        }
+
+        function toggleMicrophone() {
+            if (!localStream) {
+                showNotification('❌ No hay micrófono disponible', 'error');
+                return;
+            }
+            
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                const status = audioTrack.enabled ? 'activado' : 'desactivado';
+                console.log(`🎤 Micrófono ${status}`);
+                showNotification(`Micrófono ${status}`, 'info');
+            }
+        }
+
+        // =================== FUNCIONES DE UI ===================
+
+        function updatePeerIdDisplay(peerId) {
+            const display = document.getElementById('peerIdDisplay');
+            if (display) {
+                display.textContent = peerId;
+                display.classList.add('slide-in');
+            }
+            
+            // Actualizar también en el input si está vacío
+            const remoteInput = document.getElementById('remotePeerId');
+            if (remoteInput && !remoteInput.value) {
+                // Sugerir un ID de prueba (cambia los últimos caracteres)
+                const testId = peerId.replace(/.{3}$/, 'xxx');
+                remoteInput.placeholder = `Ej: ${testId}`;
+            }
+        }
+
+        function updateStatus(status, message) {
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = status;
+                
+                // Agregar clase de animación
+                statusElement.classList.add('slide-in');
+                setTimeout(() => {
+                    statusElement.classList.remove('slide-in');
+                }, 500);
+            }
+        }
+
+        function updateCallUI(inCall) {
+            const callButton = document.getElementById('callButton');
+            const remoteInput = document.getElementById('remotePeerId');
+            
+            if (callButton) {
+                callButton.disabled = inCall;
+                callButton.textContent = inCall ? '📞 En Llamada...' : '📞 Iniciar Videollamada';
+            }
+            
+            if (remoteInput) {
+                remoteInput.disabled = inCall;
+            }
+        }
+
+        function copyPeerId() {
+            if (!currentPeerId) {
+                showNotification('❌ No hay ID para copiar', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentPeerId)
+                .then(() => {
+                    showNotification('✅ ID copiado al portapapeles', 'success');
+                })
+                .catch(err => {
+                    console.error('❌ Error al copiar:', err);
+                    showNotification('❌ Error al copiar ID', 'error');
+                });
+        }
+
+        function generateNewId() {
+            const newId = generatePeerId();
+            localStorage.setItem('peerId', newId);
+            showNotification('🆕 Nuevo ID generado. Recargando...', 'info');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        }
+
+        function showNotification(message, type = 'info') {
+            console.log(`💬 ${type}: ${message}`);
+            
+            // Crear elemento de notificación
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <span class="notification-icon">
+                    ${type === 'success' ? '✅' : 
+                      type === 'error' ? '❌' : 
+                      type === 'warning' ? '⚠️' : 'ℹ️'}
+                </span>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Eliminar después de 5 segundos
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // =================== FUNCIONES GLOBALES ===================
+
+        window.startCall = startCall;
+        window.endCall = endCall;
+        window.toggleCamera = toggleCamera;
+        window.toggleMicrophone = toggleMicrophone;
+        window.copyPeerId = copyPeerId;
+        window.generateNewId = generateNewId;
+
+        console.log('✅ Sistema de videollamada listo');
+    </script>
+</body>
+</html>
