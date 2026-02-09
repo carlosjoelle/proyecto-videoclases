@@ -30,15 +30,81 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         }
         
-        /* HEADER */
+        /* NUEVO: HEADER CON LOGO Y BOTONES DE NAVEGACIÓN */
         .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #4fc3a1;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: #2563eb;
+        }
+        
+        .logo-text p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #333;
+            text-decoration: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: #2563eb;
+        }
+        
+        .nav-btn.home {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        
+        .nav-btn.home:hover {
+            background: #1d4ed8;
+        }
+        
+        /* TÍTULO PRINCIPAL */
+        .main-title {
             text-align: center;
             margin-bottom: 40px;
             padding-bottom: 25px;
             border-bottom: 3px solid #f0f0f0;
         }
         
-        .header h1 {
+        .main-title h1 {
             color: #2563eb;
             font-size: 2.5rem;
             margin-bottom: 15px;
@@ -356,9 +422,25 @@
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>📞 Videollamada PeerJS - FUNCIONAL</h1>
+        <!-- NUEVO: HEADER CON BOTONES DE NAVEGACIÓN -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📞</div>
+                <div class="logo-text">
+                    <h1>Videollamada PeerJS</h1>
+                    <p>Comunicación 1 a 1 en tiempo real</p>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="index.html" class="nav-btn home">🏠 Inicio</a>
+                <a href="videoclases.html" class="nav-btn">🎬 Videoclases</a>
+            </div>
+        </header>
+
+        <!-- TÍTULO PRINCIPAL -->
+        <div class="main-title">
+            <h1>Videollamada PeerJS - FUNCIONAL</h1>
             <p>Comunicación 1 a 1 en tiempo real - ¡GARANTIZADO!</p>
             <div class="status-container">
                 <div id="status" class="status-disconnected">
@@ -459,7 +541,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT CORREGIDO - SIN ERROR "cannot read properties of undefined" -->
+    <!-- JAVASCRIPT (Mismo que antes) -->
     <script>
         // ============================================
         // VIDEOLAMADA PEERJS - VERSIÓN CORREGIDA
@@ -490,16 +572,12 @@
             console.log('✅ DOM cargado');
             updateStatus('initializing', '🔄 Inicializando...');
             
-            // Esperar a que PeerJS se cargue completamente
             setTimeout(initializeSystem, 1500);
         });
-
-        // =================== SISTEMA PRINCIPAL ===================
 
         function initializeSystem() {
             console.log('🔧 Inicializando sistema...');
             
-            // 1. Verificar que PeerJS esté cargado
             if (typeof Peer === 'undefined') {
                 console.error('❌ PeerJS no está cargado');
                 showNotification('❌ PeerJS no se cargó. Recarga la página.', 'error');
@@ -507,10 +585,8 @@
                 return;
             }
             
-            // 2. Inicializar PeerJS
             initializePeerJS();
             
-            // 3. Obtener medios locales
             getLocalMedia().catch(() => {
                 console.log('⚠️ No se pudo obtener cámara/micrófono');
             });
@@ -521,19 +597,16 @@
             updateStatus('connecting', '🔄 Conectando...');
             
             try {
-                // Generar ID único
                 currentPeerId = generatePeerId();
                 console.log(`🆔 ID: ${currentPeerId}`);
                 updatePeerIdDisplay(currentPeerId);
                 
-                // Crear instancia de Peer CON VERIFICACIÓN
                 peer = new Peer(currentPeerId, PEER_CONFIG);
                 
                 if (!peer) {
                     throw new Error('No se pudo crear Peer');
                 }
                 
-                // Configurar eventos DESPUÉS de crear la instancia
                 setupPeerEvents();
                 
             } catch (error) {
@@ -541,13 +614,11 @@
                 showNotification('❌ Error: ' + error.message, 'error');
                 updateStatus('error', '❌ Error de conexión');
                 
-                // Reintentar después de 5 segundos
                 setTimeout(initializePeerJS, 5000);
             }
         }
 
         function setupPeerEvents() {
-            // VERIFICAR que peer existe ANTES de usar .on()
             if (!peer || typeof peer.on !== 'function') {
                 console.error('❌ peer no está definido o no tiene método .on()');
                 return;
@@ -555,7 +626,6 @@
             
             console.log('🔧 Configurando eventos...');
             
-            // Evento: Conexión exitosa
             peer.on('open', function(id) {
                 console.log(`✅✅ CONECTADO! ID: ${id}`);
                 updateStatus('connected', '✅ Conectado - Listo');
@@ -565,7 +635,6 @@
                 isPeerInitialized = true;
             });
             
-            // Evento: Llamada entrante
             peer.on('call', function(call) {
                 console.log('📞 Llamada entrante de:', call.peer);
                 
@@ -576,7 +645,6 @@
                 
                 showNotification(`📞 Llamada de ${call.peer}`, 'info');
                 
-                // Aceptar automáticamente después de 3 segundos
                 setTimeout(() => {
                     if (!isCallActive) {
                         acceptIncomingCall(call);
@@ -584,7 +652,6 @@
                 }, 3000);
             });
             
-            // Evento: Error
             peer.on('error', function(err) {
                 console.error('❌ Error PeerJS:', err.type);
                 
@@ -596,7 +663,6 @@
                 showNotification(message, 'error');
             });
             
-            // Evento: Desconexión
             peer.on('disconnected', function() {
                 console.log('🔌 Desconectado');
                 showNotification('🔌 Desconectado', 'warning');
@@ -615,8 +681,6 @@
             const random = Math.random().toString(36).substring(2, 8);
             return prefix + random;
         }
-
-        // =================== MANEJO DE MEDIOS ===================
 
         function getLocalMedia() {
             return new Promise((resolve, reject) => {
@@ -656,12 +720,9 @@
             });
         }
 
-        // =================== LLAMADAS ===================
-
         function startCall() {
             console.log('📞 startCall() llamado');
             
-            // VERIFICAR que peer está inicializado
             if (!isPeerInitialized || !peer || peer.disconnected) {
                 showNotification('❌ No estás conectado. Espera...', 'error');
                 return;
@@ -680,7 +741,6 @@
             
             disableCallControls();
             
-            // Asegurar medios locales
             if (!localStream) {
                 getLocalMedia()
                     .then(() => makeCall(remotePeerId))
@@ -691,7 +751,6 @@
         }
 
         function makeCall(remotePeerId) {
-            // VERIFICACIÓN EXTRA antes de usar peer.call()
             if (!peer || typeof peer.call !== 'function') {
                 showNotification('❌ Error: Peer no inicializado', 'error');
                 enableCallControls();
@@ -710,7 +769,6 @@
                 currentCall = call;
                 isCallActive = true;
                 
-                // Configurar eventos de la llamada
                 call.on('stream', function(stream) {
                     console.log('✅✅ Stream remoto recibido!');
                     remoteStream = stream;
@@ -728,7 +786,6 @@
                 call.on('close', endCall);
                 call.on('error', endCall);
                 
-                // Timeout
                 setTimeout(() => {
                     if (isCallActive && !remoteStream) {
                         showNotification('⏰ Usuario no respondió', 'warning');
@@ -803,8 +860,6 @@
             showNotification('📞 Llamada finalizada', 'info');
         }
 
-        // =================== CONTROLES ===================
-
         function enableControls() {
             const startBtn = document.getElementById('startCallBtn');
             const callBtn = document.getElementById('callButton');
@@ -853,8 +908,6 @@
             }
         }
 
-        // =================== UI ===================
-
         function updateStatus(type, message) {
             const statusEl = document.getElementById('status');
             const statusText = document.getElementById('status-text');
@@ -883,7 +936,6 @@
                     showNotification('✅ ID copiado', 'success');
                 })
                 .catch(() => {
-                    // Fallback
                     const textArea = document.createElement('textarea');
                     textArea.value = currentPeerId;
                     document.body.appendChild(textArea);
